@@ -4,12 +4,11 @@ import Logo from '../assets/logo-text.png';
 const Nav = () => {
     return (
 
-        // <nav className="mx-auto h-[80px] w-[1280px] border-b border-gray-200 bg-white">
         <nav className="w-full h-[80px] border-b border-gray-200 bg-white">
 
             <div className="flex h-full items-center justify-between px-6">
 
-                {/* Logo */}
+                {/* Logo */} 
                 <img src={Logo} alt="Dev Stack" className="w-[130px] h-auto" />
 
                 {/* Middle items part */}
