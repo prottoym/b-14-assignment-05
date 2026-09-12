@@ -6,6 +6,7 @@ import Card from './components/Card';
 import Footer from './components/Footer';
 import Nav from './components/Nav';
 import type { Icard } from './types/CardType';
+import Tech from './components/Tech';
 
 const cardFetch = async(): Promise<Icard[]>=>{
   const res = await fetch('/data.json')
@@ -25,9 +26,10 @@ function App() {
 
     <Banner></Banner>
 
-    <Suspense fallback={<h2>Loding......</h2>}>
+    {/* <Suspense fallback={<h2>Loding......</h2>}>
       <Card cardPromise = {cardPromise}></Card>
-    </Suspense>
+    </Suspense> */}
+    <Tech></Tech>
     
 
 
