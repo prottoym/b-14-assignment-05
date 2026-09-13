@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Star, X, Loader2 } from "lucide-react";
+import { toast } from "react-toastify";
 import type { Icard } from "../types/CardType";
 
 const DIFFICULTY_STYLES: Record<string, string> = {
@@ -25,9 +26,8 @@ export default function Tech() {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const [stack, setStack] = useState<Icard[]>([]);
-  const [warning, setWarning] = useState<string | null>(null);
 
-  // Load data from the JSON file instead of hardcoding it in the component.
+
   useEffect(() => {
     fetch("/data.json")
       .then((res) => {
@@ -44,20 +44,26 @@ export default function Tech() {
       });
   }, []);
 
-  const isAdded = (id: number) => stack.some((t) => t.id === id);
+  const isAdded = (id: string) => stack.some((t) => t.id === id);
 
   const handleAdd = (tech: Icard) => {
     if (isAdded(tech.id)) {
-      setWarning(`${tech.name} is already in your stack.`);
-      setTimeout(() => setWarning(null), 2500);
+      toast.warning(`${tech.name} is already in your stack.`);
       return;
     }
     setStack((prev) => [...prev, tech]);
+    toast.success(`${tech.name} added to your stack.`);
   };
 
-  const handleRemove = (id: number) =>
-    setStack((prev) => prev.filter((t) => t.id !== id));
-  const handleRemoveAll = () => setStack([]);
+  const handleRemove = (tech: Icard) => {
+    setStack((prev) => prev.filter((t) => t.id !== tech.id));
+    toast.info(`${tech.name} removed from your stack.`);
+  };
+
+  const handleRemoveAll = () => {
+    setStack([]);
+    toast.info("All technologies removed from your stack.");
+  };
 
   if (loading) {
     return (
@@ -78,18 +84,11 @@ export default function Tech() {
 
   return (
     <div className="min-h-screen bg-white px-6 py-10 sm:px-10">
-      {/* Toast-style warning, fixed so it's visible even while scrolled */}
-      {warning && (
-        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 rounded-lg border border-amber-200 bg-amber-50 text-amber-700 text-sm px-4 py-3 shadow-md">
-          ⚠ {warning}
-        </div>
-      )}
-
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
+
         <h1 className="text-3xl sm:text-[34px] font-extrabold text-gray-900 mb-1.5 leading-tight">
           Explore the{" "}
-          <span className="bg-gradient-to-r from-fuchsia-600 to-pink-500 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-orange-500 via-pink-500 to-purple-600 bg-clip-text text-transparent">
             Technologies
           </span>
         </h1>
@@ -99,15 +98,15 @@ export default function Tech() {
 
         <div className="flex flex-col lg:flex-row gap-6 items-start w-full">
           {/* Technology cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 flex-1 min-w-0 w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 flex-1 min-w-0 w-full items-stretch">
             {technologies.map((tech) => {
               const added = isAdded(tech.id);
               return (
                 <div
                   key={tech.id}
-                  className="w-full bg-white border border-gray-200 rounded-2xl p-5 flex flex-col gap-3"
+                  className="w-full h-full bg-white border border-gray-200 rounded-2xl p-5 flex flex-col gap-3"
                 >
-                  {/* Icon + badge */}
+                  {/* Icon */}
                   <div className="flex items-start justify-between">
                     <div className="w-10 h-10 flex items-center justify-center">
                       <img
@@ -121,9 +120,8 @@ export default function Tech() {
                     </div>
                     {tech.badge && (
                       <span
-                        className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ${
-                          BADGE_STYLES[tech.badge] || "bg-gray-100 text-gray-600"
-                        }`}
+                        className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ${BADGE_STYLES[tech.badge] || "bg-gray-100 text-gray-600"
+                          }`}
                       >
                         {tech.badge}
                       </span>
@@ -140,15 +138,13 @@ export default function Tech() {
                     {tech.description}
                   </p>
 
-                  {/* Chips row */}
                   <div className="flex items-center gap-2 flex-wrap text-xs">
                     <span className="font-medium px-2.5 py-1 rounded-md bg-gray-100 text-gray-600">
                       {tech.category}
                     </span>
                     <span
-                      className={`font-medium ${
-                        DIFFICULTY_STYLES[tech.difficulty] || "text-gray-500"
-                      }`}
+                      className={`font-medium ${DIFFICULTY_STYLES[tech.difficulty] || "text-gray-500"
+                        }`}
                     >
                       {tech.difficulty}
                     </span>
@@ -158,15 +154,14 @@ export default function Tech() {
                     </span>
                   </div>
 
-                  {/* Add to Stack button */}
+                  {/* Add button  */}
                   <button
                     onClick={() => handleAdd(tech)}
                     disabled={added}
-                    className={`w-full h-[38px] rounded-lg text-sm font-medium transition-colors ${
-                      added
+                    className={`w-full h-[38px] rounded-lg text-sm font-medium transition-colors mt-auto ${added
                         ? "bg-emerald-50 text-emerald-600 cursor-not-allowed"
                         : "bg-gray-900 text-white hover:bg-gray-800"
-                    }`}
+                      }`}
                   >
                     {added ? "✓ Added to Stack" : "Add to Stack"}
                   </button>
@@ -175,7 +170,7 @@ export default function Tech() {
             })}
           </div>
 
-          {/* Your Stack panel */}
+          {/* Stack panel */}
           <div className="w-full lg:w-[280px] lg:shrink-0 border border-gray-200 rounded-2xl p-5">
             <h4 className="text-[15px] font-bold text-gray-900">Your Stack</h4>
             <p className="text-xs text-gray-400 mb-4">
@@ -210,7 +205,7 @@ export default function Tech() {
                     </div>
                   </div>
                   <button
-                    onClick={() => handleRemove(tech.id)}
+                    onClick={() => handleRemove(tech)}
                     className="text-gray-400 hover:text-gray-700 shrink-0"
                     aria-label={`Remove ${tech.name}`}
                   >
@@ -220,15 +215,13 @@ export default function Tech() {
               ))}
             </div>
 
-            {/* Always visible; disabled when the stack is empty */}
             <button
               onClick={handleRemoveAll}
               disabled={stack.length === 0}
-              className={`w-full h-[36px] rounded-lg border text-sm font-medium transition-colors ${
-                stack.length === 0
+              className={`w-full h-[36px] rounded-lg border text-sm font-medium transition-colors ${stack.length === 0
                   ? "border-gray-200 text-gray-300 cursor-not-allowed"
                   : "border-rose-200 text-rose-500 hover:bg-rose-50"
-              }`}
+                }`}
             >
               Remove All
             </button>
@@ -236,38 +229,7 @@ export default function Tech() {
         </div>
       </div>
 
-      {/* Section end divider */}
       <div className="border-b border-gray-200 bg-white mt-10"></div>
     </div>
   );
 }
-
-
-// import React from 'react';
-
-// const Tech = ({ card }) => {
-//     return (
-//         <div className="w-[1216px] h-[72px]">
-//             <h1 className="text-[40px] leading-[42px] font-bold text-[#0F172A] w-[1216px] h-[40px]">
-//                 Explore The{' '}
-//                 <span className="font-bold text-purple-500">
-//                     Technologies
-//                 </span>
-//             </h1>
-//             <p className='w-[1216px] h-[24px]'>pick one technology per catagory to build your ideal stack</p>
-//         </div>
-//     );
-// };
-
-// export default Tech;
-
-// <div>
-//     {
-//         <div>
-//             {card.name}
-//         </div>
-
-//     }
-
-
-// </div>
